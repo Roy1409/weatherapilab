@@ -23,9 +23,12 @@ public class WeatherPanel extends JPanel implements ActionListener, ItemListener
     private String tempLabel;
     private String conditionLabel;
     private String locationLabel;
+    private String mintemp;
+    private String maxtemp;
     private BufferedImage conditionImage;
     private WeatherModel weather;
     private boolean y;
+    private String date;
 
     public WeatherPanel() {
         zipcodeEntry = new JTextField(10);
@@ -46,6 +49,7 @@ public class WeatherPanel extends JPanel implements ActionListener, ItemListener
         zipcodeEntry.addActionListener(this);
         submitButton.addActionListener(this);
         clearButton.addActionListener(this);
+        forecastButton.addActionListener(this);
         showCelsiusCheckBox.addItemListener(this); // JCheckBox uses ItemListener interface
 
         add(zipcodeEntry);
@@ -93,15 +97,31 @@ public class WeatherPanel extends JPanel implements ActionListener, ItemListener
         // draw condition label and image
         g.drawString(conditionLabel, 200, 140);
         g.drawImage(conditionImage, 455, 75, null); } else{
-            g.drawString();
+            g.drawString(locationLabel, 10, 100);
+            g.drawString(date,225,100);
+            g.drawString(mintemp,225,150);
+            g.drawString(maxtemp,10,150);
         }
+        repaint();
     }
 
     private void loadWeather(String zip) {
         if (!y) {
-       weather = WeatherNetworking.getWeatherForZip(zip); }else{
+       weather = WeatherNetworking.getWeatherForZip(zip);
+        }else{
             weather=WeatherNetworking.getForeCastZip(zip);
         }
+        if (y) {
+            locationLabel = "Location: " + weather.getLocation();
+            date="Date: "+weather.getDate();
+            if (showCelsiusCheckBox.isSelected()) {
+                mintemp="Min temp: "+weather.getMintempc() + "°C";
+                maxtemp="Max temp: "+weather.getMaxtempc() + "°C";
+            } else{
+                mintemp="Min temp: "+weather.getMintempf() + "°F";
+                maxtemp="Max temp: "+weather.getMaxtempf() + "°F";
+            }
+        } else{
         // make API request which returns a WeatherModel object
         locationLabel = "Location: " + weather.getLocation();
         if (showCelsiusCheckBox.isSelected()) {
@@ -109,7 +129,7 @@ public class WeatherPanel extends JPanel implements ActionListener, ItemListener
         } else {
             tempLabel = "Current temp: " + weather.getTempF() + "°F";
         }
-        conditionLabel = "Current condition: " + weather.getCondition();
+        conditionLabel = "Current condition: " + weather.getCondition(); }
 
         // convert condition "icon" (image) from a URL to a BufferedImage that
         // can be drawn on the screen
@@ -151,6 +171,7 @@ public class WeatherPanel extends JPanel implements ActionListener, ItemListener
     @Override
     public void actionPerformed(ActionEvent e) {
         Object source = e.getSource();
+        requestFocusInWindow();
         if (source == submitButton) {
             y=false;
             String zipCode = zipcodeEntry.getText();
@@ -173,13 +194,21 @@ public class WeatherPanel extends JPanel implements ActionListener, ItemListener
         Object source = e.getSource();
         if (weather != null && source instanceof JCheckBox) {
             JCheckBox box = (JCheckBox) source;  // cast source from Object to JCheckBox so we
-                                                 // can call the isSelected() JCheckBox method
+
+            if (!y) {// can call the isSelected() JCheckBox method
             if (box.isSelected()) {
                 tempLabel = "Current temp: " + weather.getTempC() + "°C";
             } else {
                 tempLabel = "Current temp: " + weather.getTempF() + "°F";
+            }}else{
+                if (box.isSelected()){
+                mintemp="Min temp: "+weather.getMintempc() + "°C";
+                maxtemp="Max temp: "+weather.getMaxtempc() + "°C"; }else{
+
+                mintemp="Min temp: "+weather.getMintempf() + "°F";
+                maxtemp="Max temp: "+weather.getMaxtempf() + "°F";
             }
-        }
+        }}
         repaint();  // redraw panel
     }
 }

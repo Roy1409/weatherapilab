@@ -60,21 +60,22 @@ public class WeatherNetworking {
         double maxTempF = 0.0;
         String date="";
         JSONObject jsonObj = new JSONObject(urlResponse);
+
         JSONObject currentObj = jsonObj.getJSONObject("forecast");
-        JSONArray array= currentObj.getJSONArray("forecastday");
-            JSONObject x = array.getJSONObject(1);
-        minTempC = x.getDouble("mintemp_c");
-        minTempF = x.getDouble("mintemp_f");
-        maxTempC = x.getDouble("maxtemp_c");
-        maxTempF = x.getDouble("maxtemp_f");
-        date= x.getString("date");
-        JSONObject locationObj = x.getJSONObject("location");
+        JSONArray x= currentObj.getJSONArray("forecastday");
+        JSONObject a=x.getJSONObject(1);
+
+        JSONObject b= a.getJSONObject("day");
+        minTempC = b.getDouble("mintemp_c");
+        minTempF = b.getDouble("mintemp_f");
+        maxTempC = b.getDouble("maxtemp_c");
+        maxTempF = b.getDouble("maxtemp_f");
+        date= a.getString("date");
+        JSONObject locationObj = jsonObj.getJSONObject("location");
         String location = locationObj.getString("name");
         WeatherModel weather = new WeatherModel(minTempC,minTempF,maxTempC,maxTempF,location,date);
         return weather;
     }
-
-
 }
 
 
